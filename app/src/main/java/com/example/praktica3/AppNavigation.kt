@@ -3,6 +3,9 @@ package com.example.praktica3
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -76,7 +79,7 @@ fun AppNavigation(viewModel: PlayerViewModel) {
                 val players by viewModel.players.collectAsState()
                 PlayerListScreen(players) { id -> navController.navigate("details/$id") }
             }
-            composable("video") { VideoScreen() }
+            composable(route = "video") { VideoScreen(viewModel) }
             composable("notifications") { InfoScreen() }
 
             composable(
@@ -90,6 +93,7 @@ fun AppNavigation(viewModel: PlayerViewModel) {
         }
     }
 }
+
 
 
 @Composable
@@ -111,18 +115,93 @@ fun HomeScreen() {
 }
 
 @Composable
-fun VideoScreen() {
+fun VideoScreen(viewModel: PlayerViewModel) {
+    val state by viewModel.videoState.collectAsState()
+    val context = LocalContext.current
+
+    // Список реальных соперников для ФК Урал
+    val rivals = listOf("Зенит", "Локомотив", "Спартак", "ЦСКА", "Краснодар", "Динамо", "Ростов", "Пари НН")
+
+    LaunchedEffect(Unit) {
+        viewModel.loadVideos()
+    }
+
     Column(Modifier.fillMaxSize()) {
-        Text("Видеогалерея", Modifier.padding(16.dp), fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-            items(5) { index ->
-                Card(
-                    Modifier.fillMaxWidth().height(180.dp).padding(bottom = 16.dp),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Box(Modifier.background(Color.DarkGray).fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.PlayArrow, null, Modifier.size(60.dp), tint = Color.White)
-                        Text("Обзор матча #$index", Modifier.align(Alignment.BottomStart).padding(12.dp), color = Color.White)
+        Text(
+            text = "Видеогалерея матчей",
+            modifier = Modifier.padding(16.dp),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        when (val s = state) {
+            is VideoState.Loading -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color(0xFFF39C12))
+                }
+            }
+            is VideoState.Error -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(s.message, color = Color.Red, modifier = Modifier.padding(16.dp))
+                }
+            }
+            is VideoState.Success -> {
+                LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                    // Используем itemsIndexed, чтобы подставлять команды по очереди
+                    itemsIndexed(s.videos) { index, video ->
+                        val rivalName = rivals.getOrElse(index % rivals.size) { "Соперник" }
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .padding(bottom = 16.dp)
+                                .clickable {
+                                    // Теперь ссылка ведет на конкретный матч
+                                    val intent = Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://www.youtube.com/results?search_query=фк+урал+vs+$rivalName+обзор+матча")
+                                    )
+                                    context.startActivity(intent)
+                                },
+                            shape = RoundedCornerShape(12.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            Box(Modifier.fillMaxSize()) {
+                                Box(Modifier.background(Color.Black).fillMaxSize())
+
+                                Column(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PlayArrow,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(64.dp),
+                                        tint = Color(0xFFF39C12)
+                                    )
+                                    Text(
+                                        text = "СМОТРЕТЬ ОБЗОР",
+                                        color = Color.White,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontSize = 14.sp
+                                    )
+                                }
+
+                                Surface(
+                                    modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth(),
+                                    color = Color.Black.copy(alpha = 0.6f)
+                                ) {
+                                    Text(
+                                        text = "Обзор матча: Урал — $rivalName",
+                                        modifier = Modifier.padding(12.dp),
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
