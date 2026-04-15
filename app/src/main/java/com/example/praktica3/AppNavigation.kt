@@ -29,14 +29,19 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 
 @Composable
-fun AppNavigation(viewModel: PlayerViewModel) {
+fun AppNavigation(
+    viewModel: PlayerViewModel,
+    profileViewModel: ProfileViewModel
+) {
     val navController = rememberNavController()
     val showBadge by viewModel.showBadge.collectAsState()
+
 
     val navItemsList = listOf(
         Triple("home", Icons.Default.Home, "Главная"),
         Triple("list", Icons.Default.List, "Список"),
         Triple("video", Icons.Default.PlayArrow, "Видео"),
+        Triple("profile", Icons.Default.Person, "Профиль"),
         Triple("notifications", Icons.Default.Info, "Инфо")
     )
 
@@ -63,7 +68,6 @@ fun AppNavigation(viewModel: PlayerViewModel) {
                         icon = {
                             BadgedBox(
                                 badge = {
-                                    // Точка в нижнем меню (Задача 3)
                                     if (route == "list" && showBadge) {
                                         Badge(
                                             containerColor = Color(0xFFF39C12),
@@ -101,7 +105,6 @@ fun AppNavigation(viewModel: PlayerViewModel) {
         ) {
             composable("home") { HomeScreen() }
 
-            // Отдельный экран настроек (Задача 1)
             composable("filters") {
                 FilterScreen(
                     viewModel = viewModel,
@@ -121,6 +124,12 @@ fun AppNavigation(viewModel: PlayerViewModel) {
             }
 
             composable("video") { VideoScreen(viewModel) }
+
+            // Новый маршрут для экрана Профиля
+            composable("profile") {
+                ProfileScreen(viewModel = profileViewModel)
+            }
+
             composable("notifications") { InfoScreen() }
 
             composable(
