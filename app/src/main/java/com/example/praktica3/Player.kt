@@ -10,7 +10,8 @@ data class Player(
     val position: String,
     val team: String,
     val stats: List<Pair<String, Long>>,
-    @DrawableRes val photoRes: Int
+    @DrawableRes val photoRes: Int,
+    val description: String = ""
 )
 
 val mockPlayers = listOf(

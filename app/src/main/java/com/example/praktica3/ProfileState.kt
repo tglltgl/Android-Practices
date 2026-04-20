@@ -6,5 +6,7 @@ data class ProfileState(
     val name: String = "",
     val photoUri: Uri? = null,
     val resumeUrl: String = "",
-    val isEditing: Boolean = false
+    val isEditing: Boolean = false,
+    val pairTime: String = "",
+    val timeError: String? = null
 )
