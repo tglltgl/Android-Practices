@@ -3,24 +3,28 @@ package com.example.praktica3.data
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import retrofit2.http.Path
 
 
-data class VideoResponse(
-    val id: Int,
-    val title: String,
-    val description: String,
-    val image: String,
-    val category: String
+data class SportsVideoResponse(
+    val tvshows: List<VideoItem>?
+)
+
+data class VideoItem(
+    val idEvent: String?,
+    val strEvent: String?,
+    val strSport: String?,
+    val strVideo: String?,
+    val strThumb: String?
 )
 
 interface FootballApi {
-    @GET("products/{id}")
-    suspend fun getVideo(@Path("id") id: Int): VideoResponse
+
+    @GET("eventsallvideo.php")
+    suspend fun getLatestVideos(): SportsVideoResponse
 }
 
 object Network {
-    private const val BASE_URL = "https://fakestoreapi.com/"
+    private const val BASE_URL = "https://www.thesportsdb.com/api/v1/json/3/"
 
     val api: FootballApi by lazy {
         Retrofit.Builder()

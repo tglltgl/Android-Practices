@@ -5,6 +5,8 @@ import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,7 +29,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import com.example.praktica3.data.VideoItem
 import com.example.praktica3.ui.theme.UralColors
+import com.example.profile.ProfileScreen
+import com.example.profile.ProfileViewModel
 
 
 @Composable
@@ -254,7 +259,6 @@ fun PlayerDetailScreen(player: Player, viewModel: PlayerViewModel, onBack: () ->
 fun VideoScreen(viewModel: PlayerViewModel) {
     val state by viewModel.videoState.collectAsState()
     val context = LocalContext.current
-    val rivals = listOf("Зенит", "Спартак", "ЦСКА", "Локомотив")
 
     LaunchedEffect(Unit) { viewModel.loadVideos() }
 
@@ -267,20 +271,43 @@ fun VideoScreen(viewModel: PlayerViewModel) {
             is VideoState.Success -> {
                 LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
                     items(s.videos) { video ->
-                        val index = s.videos.indexOf(video)
-                        val rival = rivals.getOrElse(index % rivals.size) { "Соперник" }
+                        val title = video.strEvent ?: "Спортивное событие"
+                        val videoUrl = video.strVideo ?: "https://www.youtube.com"
+                        val category = video.strSport ?: "Футбол"
+
                         Card(
-                            modifier = Modifier.fillMaxWidth().height(200.dp).padding(bottom = 16.dp).clickable {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/results?search_query=фк+урал+vs+$rival+обзор"))
-                                context.startActivity(intent)
-                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .padding(bottom = 16.dp)
+                                .clickable {
+
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl))
+                                    context.startActivity(intent)
+                                },
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Box {
-                                Box(Modifier.fillMaxSize().background(Color.Black))
-                                Icon(Icons.Default.PlayArrow, null, Modifier.size(64.dp).align(Alignment.Center), tint = UralColors.Orange)
-                                Surface(Modifier.align(Alignment.BottomStart).fillMaxWidth(), color = Color.Black.copy(alpha = 0.6f)) {
-                                    Text("Обзор матча: Урал — $rival", Modifier.padding(12.dp), color = Color.White, fontWeight = FontWeight.Bold)
+
+                                Box(Modifier.fillMaxSize().background(Color.DarkGray))
+
+                                // Кнопка плей по центру
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(64.dp).align(Alignment.Center),
+                                    tint = UralColors.Orange
+                                )
+
+                                // Плашка с названием реального матча и категорией
+                                Surface(
+                                    modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth(),
+                                    color = Color.Black.copy(alpha = 0.7f)
+                                ) {
+                                    Column(Modifier.padding(12.dp)) {
+                                        Text(text = title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                        Text(text = "Категория: $category", color = Color.LightGray, fontSize = 12.sp)
+                                    }
                                 }
                             }
                         }

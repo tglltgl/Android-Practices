@@ -1,4 +1,4 @@
-package com.example.praktica3
+package com.example.profile
 
 import android.app.AlarmManager
 import android.app.DownloadManager
@@ -32,8 +32,7 @@ class ProfileViewModel(private val repository: ProfileRepository) : ViewModel() 
                     name = savedProfile.name,
                     photoUri = savedProfile.photoUri,
                     resumeUrl = savedProfile.resumeUrl,
-                    // Достаем сохраненное время (если в репозитории есть эти поля)
-                    // pairTime = savedProfile.pairTime,
+
                     isEditing = false
                 ) }
             }
@@ -52,11 +51,11 @@ class ProfileViewModel(private val repository: ProfileRepository) : ViewModel() 
         _state.update { it.copy(isEditing = editing) }
     }
 
-    // ОБНОВЛЕННЫЙ МЕТОД: теперь принимает context для работы с AlarmManager
+
     fun saveProfile(context: Context) {
         val currentState = _state.value
 
-        // Валидация перед сохранением
+
         if (currentState.timeError == null && currentState.pairTime.isNotEmpty()) {
             viewModelScope.launch {
                 // Сохраняем основные данные
@@ -75,20 +74,20 @@ class ProfileViewModel(private val repository: ProfileRepository) : ViewModel() 
     }
 
     private fun scheduleNotification(context: Context, time: String, name: String) {
-        // 1. Разбиваем строку времени (например "14:30") на часы и минуты
+
         val parts = time.split(":")
         if (parts.size < 2) return
 
         val hour = parts[0].toInt()
         val minute = parts[1].toInt()
 
-        // 2. СОЗДАЕМ КАЛЕНДАРЬ (этого не хватало на скрине)
+
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, hour)
             set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)
 
-            // Если это время сегодня уже прошло, ставим на завтра
+
             if (before(Calendar.getInstance())) {
                 add(Calendar.DATE, 1)
             }

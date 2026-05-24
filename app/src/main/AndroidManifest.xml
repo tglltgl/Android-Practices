@@ -42,8 +42,7 @@
         </provider>
 
         <receiver
-            android:name=".PairReceiver"
-            android:enabled="true"
+            android:name="com.example.profile.PairReceiver"
             android:exported="false" />
 
     </application>

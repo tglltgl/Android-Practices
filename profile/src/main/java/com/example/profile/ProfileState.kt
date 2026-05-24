@@ -1,4 +1,4 @@
-package com.example.praktica3
+package com.example.profile
 
 import android.net.Uri
 

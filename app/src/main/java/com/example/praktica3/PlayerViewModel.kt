@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 
 sealed class VideoState {
     object Loading : VideoState()
-    data class Success(val videos: List<VideoResponse>) : VideoState()
+    data class Success(val videos: List<VideoItem>) : VideoState()
     data class Error(val message: String) : VideoState()
 }
 
@@ -108,10 +108,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             _videoState.value = VideoState.Loading
             try {
-                val v1 = Network.api.getVideo(1)
-                val v2 = Network.api.getVideo(2)
-                val v3 = Network.api.getVideo(3)
-                _videoState.value = VideoState.Success(listOf(v1, v2, v3))
+                val response = Network.api.getLatestVideos()
+                _videoState.value = VideoState.Success(response.tvshows ?: emptyList())
             } catch (e: Exception) {
                 _videoState.value = VideoState.Error("Не удалось загрузить обзоры.")
             }
