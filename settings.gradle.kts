@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "praktica3"
 include(":app")
+include(":profile")
